@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My name Jeff</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+	<style>
+		body{
+			background-image: url(http://i1.kym-cdn.com/entries/icons/original/000/016/894/JEFF.jpg);
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-attachment: fixed;
+			background-size: cover;
+		}
+		.btn-lg{
+			width: 200px;
+			height: 100px;
+			margin-left: 50px;
+			margin-right: 50px;
+			margin-top: 30px;
+		}		
+	</style>
+	
+	<center>
+		<br><br>
+		<input class="form-control" id="ytlink" type="text" name="yt" placeholder="Youtube link" style="width: 400px; display: inline;">
+		<button class="btn btn-success" id="ytsubmit">Play</button>
+
+		<div id="buttons">
+		</div>
+
+		<br><br>
+		<form method="post" enctype="multipart/form-data" action="/upload">
+			<input type="file" name="sound">
+			<input type="text" name="channelid" id="channelid" style="display: none;">
+			<input class="btn btn-success" type="submit" value="Submit">
+		</form>
+	</center>
+
+	<script
+		src="https://code.jquery.com/jquery-3.2.1.min.js"
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+		crossorigin="anonymous"></script>
+	<script>
+		function getQueryParams(qs) {
+			qs = qs.split('+').join(' ');
+			var params = {},
+			tokens,
+			re = /[?&]?([^=]+)=([^&]*)/g;
+
+			while (tokens = re.exec(qs)) {
+				params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+			}
+
+			return params;
+		}
+
+		$(document).ready(function(){
+			urlpar = getQueryParams(document.location.search);
+
+			if(urlpar.id){
+			}else{
+				$("body").html("No voice channel ID in URL")
+			}
+
+			$("#channelid").val(urlpar.id)
+
+			$.ajax("/files", {
+			method: "GET",
+			dataType: "json"
+			}).then(function(response){
+				$.each(response, function(i, item) {
+	  				$("#buttons").append('<button class="soundbtn btn btn-danger btn-lg" id="'+item+'">'+item+'</button>');
+				});
+			})
+
+			$(document).on("click", ".soundbtn", function(){
+				$.ajax("/play", {
+					method: "POST",
+					contentType: "application/json; charset=utf-8",
+					data: JSON.stringify({
+						id: urlpar.id,
+						file: $(this).attr("id")
+					}),
+					dataType: "json"
+				});
+			});
+
+
+		});
+	</script>
+</body>
+</html>
